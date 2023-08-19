@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <style>
+        #input {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f4f4f4;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Login</h1>
+        <h5>Don't have an account?</h5>
+        <button><a href="./index.html">Signup</a></button>
+    </header>
+
+    <div id="input">
+        <div>
+            <form action="" id="login-form">
+                <input type="email" id="login-email" name="email" placeholder="example@example.com" required><br>
+                <input type="password" id="login-password" name="password" placeholder="password" required><br>
+                <input type="submit" value="Login"> 
+            </form>     
+        </div>
+    </div>
+   
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.2.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.2.0/firebase-auth.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAEgA2zHkql-ZdoVT0E_LTpUb17iP0gSho",
+          authDomain: "signup-login-8ad6f.firebaseapp.com",
+          projectId: "signup-login-8ad6f",
+          storageBucket: "signup-login-8ad6f.appspot.com",
+          messagingSenderId: "298491825015",
+          appId: "1:298491825015:web:3023bc926f9a3ccc9c6f72",
+          measurementId: "G-20SC7XE8TV"
+            // Your Firebase config here
+        };
+      
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+
+        // Wrap your JavaScript code inside the DOMContentLoaded event listener
+        document.addEventListener("DOMContentLoaded", function() {
+            // Login function
+            document.getElementById("login-form").addEventListener("submit", function(event) {
+                event.preventDefault();
+
+                const email = document.getElementById("login-email").value;
+                const password = document.getElementById("login-password").value;
+
+                signInWithEmailAndPassword(auth, email, password)
+                    .then(() => {
+                        console.log("Login successful!");
+                        window.location.href = "index.html";
+                    })
+                    .catch(error => {
+                        console.log("Error: " + error.message);
+                    });
+            });
+        });
+    
+
+        // Logout function
+        // document.getElementById("logout").addEventListener("click", function() {
+        //     signOut(auth)
+        //     .then(() => {
+        //         alert("Sign out successful!");
+        //     })
+        //     .catch(error => {
+        //         alert("Error: " + error.message);
+        //     });
+        // });
+      </script>
+</body>
+</html>

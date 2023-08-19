@@ -1,0 +1,178 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #dashboard {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 50vh;
+            background-color: #f4f4f4;
+        }
+        #blog {
+            outline: solid;
+            outline: 3px;
+        }
+        .bookTile {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            margin: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h1>DASHBOARD</h1><br>
+        <h5><button id="logout">logout</button></h5>
+    </div>
+    <div>
+        <div id="dashboard">
+            <form id="blog" method="post">
+                <input type="text" id="name" style="width: 300px;" name="name" required><br>
+                <textarea id="content" style="width: 300px; height: 150px;" placeholder="What's on your mind" required></textarea><br>
+                <button type="submit">Publish Blog</button>
+                
+            </form>
+        </div>
+    </div>
+
+    <div id="result"></div>
+    <div id="bookDisplayGrid">
+        <div id="loading" class="">Loading...</div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+        import {
+            collection, addDoc, getFirestore,
+            onSnapshot, serverTimestamp,
+            query, orderBy, deleteDoc,  doc, updateDoc
+        } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+        import {getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+        ;
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAEgA2zHkql-ZdoVT0E_LTpUb17iP0gSho",
+          authDomain: "signup-login-8ad6f.firebaseapp.com",
+          projectId: "signup-login-8ad6f",
+          storageBucket: "signup-login-8ad6f.appspot.com",
+          messagingSenderId: "298491825015",
+          appId: "1:298491825015:web:3023bc926f9a3ccc9c6f72",
+          measurementId: "G-20SC7XE8TV"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        // const auth = getAuth();
+       
+
+     
+
+        document.querySelector('#blog').addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            let name = document.querySelector("#name").value;
+            let content = document.querySelector("#content").value;
+
+            try {
+                const docRef = await addDoc(
+                    collection(db, "my-blogs"),
+                    {
+                        name: name,
+                        content: content,
+                        createdAt: serverTimestamp()
+                    });
+                console.log("Document written with ID: ", docRef.id);
+            } catch (e) {
+                console.error("Error adding document: ", e);
+            }
+        });
+
+        document.addEventListener("readystatechange", (event) => {
+            console.log(`readystate: ${document.readyState}`)
+            let loading = document.querySelector("#loading");
+
+            const q = query(collection(db, "my-blogs"), orderBy("createdAt", "desc"));
+
+            const unsubscribe = onSnapshot(q, (querySnapshot) => {
+                if (querySnapshot.size === 0) {
+                    let bookGrid = document.querySelector("#bookDisplayGrid");
+                    bookGrid.innerHTML = `<div>No Blogs found</div>`;
+                } else {
+                    let bookGrid = document.querySelector("#bookDisplayGrid");
+                    bookGrid.innerHTML = '';
+                    loading.classList.add("hidden");
+
+                    querySnapshot.forEach((doc) => {
+                        let bookGrid = document.querySelector("#bookDisplayGrid");
+
+                        let data = doc.data();
+
+                        bookGrid.innerHTML += `
+                            <div class="bookTile" id="book${doc.id}">
+                                <p>Name: ${data.name}</p>
+                                <p>Content: ${data.content}</p>
+                                <button onclick="deleteBlog('${doc.id}')">Delete</button>
+                                <button onclick="editBlog('${doc.id}', '${data.name}', '${data.content}')">Edit</button>
+                            </div>
+                        `;
+                    });
+                }
+            });
+
+            window.editBlog = async (docId, name, content) => {
+                let blogContainer = document.querySelector(`#book${docId}`);
+
+                blogContainer.innerHTML = `
+                    <form onsubmit="completeEdit(event, '${docId}')">
+                        Name: <input name="name" type="text" value="${name}">
+                        <br>
+                        Content: <input name="content" type="text" value="${content}">
+                        <br>
+                        <button type="submit">Save</button>
+                    </form>
+                `;
+            };
+
+            window.completeEdit = async (e, docId) => {
+                e.preventDefault();
+
+                await updateDoc(doc(db, 'my-blogs', docId), {
+                    name: e.target.name.value,
+                    content: e.target.content.value,
+                });
+            };
+
+            window.deleteBlog = async (docId) => {
+                await deleteDoc(doc(db, "my-blogs", docId));
+            };
+        });
+        document.addEventListener("DOMContentLoaded", () => {
+    // Your entire script code here
+
+        document.getElementById("logout").addEventListener("click", function() {
+        signOut(auth)
+        .then(() => {
+            console.log("Sign out successful!");
+            window.location.href = "login.html";
+        })
+        .catch(error => {
+            alert("Error: " + error.message);
+        });
+    });
+    });
+    </script>
+</body>
+</html>
+
